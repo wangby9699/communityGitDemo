@@ -4,7 +4,9 @@ import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.UserService;
+import com.nowcoder.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +20,16 @@ import java.util.Map;
 
 //@Controller的访问路径可以省略
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
     @Autowired
     private DiscussPostService discussPostService;
 
     //通过userService,把user的详细数据查到
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LikeService likeService;
 
     @RequestMapping(path = "/index" ,method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page){//通过model携带数据给模板
@@ -34,7 +39,7 @@ public class HomeController {
         page.setRows(discussPostService.findDiscussPostRows(0));
         page.setPath("/index");
 
-       List<DiscussPost> list= discussPostService.findDiscussPosts(0,page.getoffset(),page.getLimit());
+       List<DiscussPost> list= discussPostService.findDiscussPosts(0,page.getOffset(),page.getLimit());
        //遍历一下DiscussPost，将查到的数据userId，查到user，将数据组装，得到用户名
         //新建集合，可以封装DiscussPost与user对象的一个集合
         List<Map<String,Object>> discussPosts=new ArrayList<>();
@@ -46,12 +51,21 @@ public class HomeController {
                 //得到用户
                User user= userService.findUserById(post.getUserId());
                map.put("user",user);
+
+               long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST,post.getId());
+               map.put("likeCount",likeCount);
+
                 //把结果装到map中
                 discussPosts.add(map);
             }
         }
         model.addAttribute("discussPosts",discussPosts);
         return "/index";//返回index.html
+    }
+
+    @RequestMapping(path = "/error",method = RequestMethod.GET)
+    public String getErrorPage(){
+        return "/error/500";
     }
 
 }

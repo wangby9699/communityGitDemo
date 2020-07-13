@@ -15,5 +15,14 @@ public interface DiscussPostMapper {
     //若需要动态的做一个条件，并且该方法有且只有一个条件，则此时参数之前必须取别名，否则报错
     int selectDiscussPostRows(@Param("userId") int userId);
 
+    //增加帖子的方法
+    int insertDiscussPost(DiscussPost discussPost);
+
+    //查询帖子的详情
+    DiscussPost selectDiscussPostById(int id);
+
+    //更新评论的数量
+    int updateCommentCount(int id, int commentCount);
+
 
 }
